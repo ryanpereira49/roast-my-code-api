@@ -51,3 +51,11 @@ Content-Type: application/json
   "roast": "ARE YOU ABSOLUTELY JOKING ME?! 😭💀 JAVASCRIPT?! You chose a language where `[] + []` is `\"\"` and stringing together a bunch of `if` statements is your idea of logic?! 🗑️🤡 This readability is a disaster! It’s like a toddler threw alphabet spaghetti at the wall and called it a masterpiece! 📉🤦‍♂️ If I had to read this garbage every day, I’d gauge my eyes out! 🤬 IT’S RAW, IT’S PATHETIC, AND IT’S A TOTAL INSULT TO CODING! GET OUT! 🚪💨"
 }
 ```
+
+## Deployment
+
+For detailed instructions on how to deploy this API to a Linux VPS (Ubuntu/Debian) using PM2 and Nginx, please refer to the [Deployment Guide](./deployment_guide.md).
+
+Quick start:
+1. `npm run build`
+2. `pm2 start dist/index.js --name "roast-api"`
