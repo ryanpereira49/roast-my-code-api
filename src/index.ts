@@ -2,26 +2,40 @@ import 'dotenv/config'
 import { serve } from '@hono/node-server'
 import { Hono } from 'hono'
 import { cors } from 'hono/cors'
+import { secureHeaders } from 'hono/secure-headers'
 import { GoogleGenAI } from '@google/genai'
+import { rateLimiter } from 'hono-rate-limiter'
+import { z } from 'zod'
+import { zValidator } from '@hono/zod-validator'
 
 const app = new Hono()
 app.use('/*', cors())
+app.use('/*', secureHeaders())
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY })
 
-app.post('/roast', async (c) => {
-  try {
-    const body = await c.req.json()
-    const code = body.code
-    const niceness = body.niceness || 1
-    const persona = body.persona || 'Senior Developer'
-    const language_hate = body.language_hate === true
-    const focus = body.focus || '' // 'performance', 'readability', 'security'
-    const one_liner = body.one_liner === true
-    const emoji_toxicity = body.emoji_toxicity || 0 // 1, 2, or 3
+const limiter = rateLimiter({
+  windowMs: 60 * 1000, // 1 minute
+  limit: 10, // Limit each IP to 10 requests per windowMs
+  standardHeaders: 'draft-6', // Use RateLimit-* headers
+  keyGenerator: (c) => c.req.header('x-forwarded-for') || c.req.header('x-real-ip') || 'anon',
+  handler: (c) => {
+    return c.json({ error: 'Too many roasts! Take a break and try again in a minute.' }, 429)
+  },
+})
 
-    if (!code) {
-      return c.json({ error: 'Please provide a code snippet to roast ({"code": "..."})' }, 400)
-    }
+const roastSchema = z.object({
+  code: z.string().min(1, "Code is required").max(10000, "Code is too long"),
+  niceness: z.number().min(1).max(10).optional().default(1),
+  persona: z.string().max(100).optional().default('Senior Developer'),
+  language_hate: z.boolean().optional().default(false),
+  focus: z.string().max(50).optional().default(''),
+  one_liner: z.boolean().optional().default(false),
+  emoji_toxicity: z.number().min(0).max(3).optional().default(0),
+})
+
+app.post('/roast', limiter, zValidator('json', roastSchema), async (c) => {
+  try {
+    const { code, niceness, persona, language_hate, focus, one_liner, emoji_toxicity } = c.req.valid('json')
 
     let systemInstructionOptions = []
 
