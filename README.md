@@ -1,6 +1,6 @@
 # Roast My Code API 🔥
 
-A brutally honest REST API built with Hono and Google's Gemini 2.5 Flash that takes in code snippets and returns savage, humorous roasts. Perfect for "vibe coding" and building a funny frontend to humiliate your friends' (or your own) code. 
+A brutally honest REST API built with Hono and Google's Gemini 2.5 Flash that takes in code snippets and returns savage, humorous roasts. Perfect to humiliate your friends' (or your own) code. 
 
 ## Getting Started
 
